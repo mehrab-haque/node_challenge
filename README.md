@@ -6,3 +6,5 @@
 - Then to run the program for the provided csv file, run command **npm start** and the output will be generated at **output/out.csv**
 -  To run **automated test**, run command **npm test**
 , in this case, data will be fetched from the **input/test.csv** file and the output will be generated at **output/test_out.csv**.
+
+The main logic is in the **app.js** file with necessary comments.

@@ -2,6 +2,7 @@ const CSVToJSON = require('csvtojson');
 const createCsvWriter = require('csv-writer').createObjectCsvWriter;
 
 const analyse=(input,output)=>{
+    //Configuring the output csv file
     const csvWriter = createCsvWriter({
         path: './output/'+output,
         header: [
@@ -11,29 +12,28 @@ const analyse=(input,output)=>{
         ]
     });
 
+    //Loading input csv file
     CSVToJSON().fromFile('./input/'+input).then(array => {
-        var data={},
-            graph={
+        var data={}, //This will keep track of multiple simultaneous shifts.
+            graph={  // Object that represents graph
                 nodes:[],
                 edges:{}
             },
             csvOutput=[]
         array.map(entry=>{
-            var key=entry.date+'#'+entry.shift
-            if(!(key in data))data[key]=[]
-            data[key].push({
-                volunteerId:entry.volunteerId,
-                volunteerName:entry.volunteerName,
-                shiftReason:entry.shiftReason
-            })
-            if(!graph.nodes.includes(entry.volunteerName))graph.nodes.push(entry.volunteerName)
-            if(data[key].length>1)
+            var key=entry.date+'#'+entry.shift // Simultaneous shifts (same date and time) will be stored against the same field
+            if(!(key in data))data[key]=[] // Initializing array that'd contain the names of persons working at the same time
+            data[key].push(entry.volunteerName)
+            if(!graph.nodes.includes(entry.volunteerName))graph.nodes.push(entry.volunteerName) // Adding node to graph if it is not added yet
+            if(data[key].length>1) // If other persons are working at the same date and shift
                 for(var i=0;i<data[key].length-1;i++){
-                    var edgeIndices=[graph.nodes.indexOf(data[key][i].volunteerName),graph.nodes.indexOf(entry.volunteerName)].sort()
-                    var edgeKey=edgeIndices[0]+'#'+edgeIndices[1]
-                    graph.edges[edgeKey] = (graph.edges[edgeKey] || 0) + 1;
+                    var edgeIndices=[graph.nodes.indexOf(data[key][i]),graph.nodes.indexOf(entry.volunteerName)].sort() //sorting the 2 vertices that the edge connects as it is bidirectional
+                    var edgeKey=edgeIndices[0]+'#'+edgeIndices[1] //Naming the edge
+                    graph.edges[edgeKey] = (graph.edges[edgeKey] || 0) + 1; // Initializing orr incrementing weight by 1.
                 }
         })
+
+        //Creating object for csv output
         Object.keys(graph.edges).map(edgeKey=>{
             csvOutput.push({
                 node1:graph.nodes[parseInt(edgeKey.split('#')[0])],
@@ -41,6 +41,8 @@ const analyse=(input,output)=>{
                 weight:graph.edges[edgeKey]
             })
         })
+
+        //writing the output csv file
         csvWriter
             .writeRecords(csvOutput)
             .then(()=> console.log('CSV file generated in the output diractory'));
