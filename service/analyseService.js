@@ -1,26 +1,12 @@
-const CSVToJSON = require('csvtojson');
-const createCsvWriter = require('csv-writer').createObjectCsvWriter;
-
-const analyse=(input,output)=>{
-    //Configuring the output csv file
-    const csvWriter = createCsvWriter({
-        path: './output/'+output,
-        header: [
-            {id: 'node1', title: 'node1'},
-            {id: 'node2', title: 'node2'},
-            {id: 'weight', title: 'weight'}
-        ]
-    });
-
-    //Loading input csv file
-    CSVToJSON().fromFile('./input/'+input).then(array => {
+module.exports={
+    analyse:entries=>{
         var data={}, //This will keep track of multiple simultaneous shifts.
             graph={  // Object that represents graph
                 nodes:[],
                 edges:{}
             },
-            csvOutput=[]
-        array.map(entry=>{
+            formattedEdgeData=[]
+        entries.map(entry=>{
             var key=entry.date+'#'+entry.shift // Simultaneous shifts (same date and time) will be stored against the same field
             if(!(key in data))data[key]=[] // Initializing array that'd contain the names of persons working at the same time
             data[key].push(entry.volunteerName)
@@ -33,22 +19,15 @@ const analyse=(input,output)=>{
                 }
         })
 
-        //Creating object for csv output
+        //Formatting object for csv output
         Object.keys(graph.edges).map(edgeKey=>{
-            csvOutput.push({
+            formattedEdgeData.push({
                 node1:graph.nodes[parseInt(edgeKey.split('#')[0])],
                 node2:graph.nodes[parseInt(edgeKey.split('#')[1])],
                 weight:graph.edges[edgeKey]
             })
         })
 
-        //writing the output csv file
-        csvWriter
-            .writeRecords(csvOutput)
-            .then(()=> console.log('CSV file generated in the output diractory'));
-    }).catch(err => {
-        console.log(err)
-    });
+        return formattedEdgeData
+    }
 }
-
-module.exports={analyse}
