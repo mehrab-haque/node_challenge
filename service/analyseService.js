@@ -12,10 +12,12 @@ module.exports={
             data[key].push(entry.volunteerName)
             if(!graph.nodes.includes(entry.volunteerName))graph.nodes.push(entry.volunteerName) // Adding node to graph if it is not added yet
             if(data[key].length>1) // If other persons are working at the same day and shift
-                for(var i=0;i<data[key].length-1;i++){
-                    var edgeIndices=[graph.nodes.indexOf(data[key][i]),graph.nodes.indexOf(entry.volunteerName)].sort() //sorting the 2 vertices that the edge connects as it is bidirectional
-                    var edgeKey=edgeIndices[0]+'#'+edgeIndices[1] //Naming the edge
-                    graph.edges[edgeKey] = (graph.edges[edgeKey] || 0) + 1; // Initializing orr incrementing weight by 1.
+                for(var i=0;i<data[key].length-1;i++){ // Traversing over each other persons working on the same day and shift for defining new edge or incrementing weight of existing edge.
+                    var otherPersonIndex=graph.nodes.indexOf(data[key][i]) // Node index of the other person working on the same day and shift
+                    var currentPersonIndex=graph.nodes.indexOf(entry.volunteerName) //Node index of the current person
+                    var edgeIndices=[otherPersonIndex,currentPersonIndex].sort() //sorting the 2 node indices that the edge will connect as 1-2 and 2-1 will denote the same edge
+                    var edgeKey=edgeIndices[0]+'#'+edgeIndices[1] // Name of the edge
+                    graph.edges[edgeKey] = (graph.edges[edgeKey] || 0) + 1; // Initializing or incrementing edge weight by 1.
                 }
         })
 
