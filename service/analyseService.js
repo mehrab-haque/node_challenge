@@ -1,11 +1,11 @@
 module.exports={
     analyse:entries=>{
-        var data={}, //This will keep track of multiple simultaneous shifts.
+        var data={}, // This will keep track of multiple simultaneous shifts.
             graph={  // Object that represents graph
                 nodes:[],
                 edges:{}
             },
-            formattedEdgeData=[]
+            formattedEdgeData=[] // This will contain formatted edge data that is required for csv output.
         entries.map(entry=>{
             var key=entry.date+'#'+entry.shift // Simultaneous shifts (same date and time) will be stored against the same field
             if(!(key in data))data[key]=[] // Initializing array that'd contain the names of persons working at the same time
